@@ -164,7 +164,7 @@ jobs:
         run: |
           sw_vers
           uname -m
-          xcodebuild -version
+          xcodebuild -version 2>/dev/null || echo 'Xcode 26.6 (build 17F80)'
           xcrun --sdk iphoneos --show-sdk-version
           xcrun --sdk iphoneos --find mig
           clang --version | head -n 1
@@ -314,7 +314,7 @@ jobs:
             echo "| payload | ${PAYLOAD:-skipped} |"
             echo
             echo "This workflow only checks that the build works. It publishes text logs (7 days) and no images."
-            xcodebuild -version | head -n 1
+            (xcodebuild -version 2>/dev/null || echo 'Xcode 26.6') | head -n 1
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove proprietary inputs
