@@ -185,6 +185,12 @@ def build(ctx, modules):
         log('kernel: prepare storage headers')
         run(['python3', ctx.tree / 'scripts/prepare-storage-headers.py'], cwd=ctx.tree, env=env,
             log_file=ctx.logs / 'storage-headers.log')
+    audit = ctx.tree / 'build/storage-abi/interface-audit.json'
+    bundled = ctx.root / 'ci/interface-audit.json'
+    if not audit.is_file() and bundled.is_file():
+        audit.parent.mkdir(parents=True, exist_ok=True)
+        audit.write_bytes(bundled.read_bytes())
+        log('kernel: restored the qualified storage ABI audit')
     build_archives(ctx, env)
     run(['bash', script], cwd=ctx.tree, env=env, log_file=ctx.logs / 'kernel.log')
 
