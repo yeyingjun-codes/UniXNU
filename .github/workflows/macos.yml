@@ -277,8 +277,15 @@ jobs:
           FD=$(grep -m1 '"fd"' device/board.toml | sed 's/.*= *"//; s/".*//')
           echo "board fd template: $FD"
           find "$WORK" -name '*.fd' -o -name 'SILICIUM_UEFI.fd' 2>/dev/null | head -10
-          DTB=$(find "$WORK/tree" -name 'sheng.dtb' -o -name 'device.dtb' -o -name '*.dtb' 2>/dev/null | head -1)
-          echo "dtb: $DTB"
+          # The boot image carries the firmware device tree the firmware step
+          # compiled from device/dts/sheng.dts, not the Adreno firmware blob that
+          # also happens to be called sheng.dtb.
+          DTB="$WORK/device-tree/hardware.dtb"
+          if [ ! -f "$DTB" ]; then
+            echo "hardware.dtb missing, candidates:"; find "$WORK" -name '*.dtb' | head -10
+            exit 1
+          fi
+          echo "dtb: $DTB ($(stat -f%z "$DTB" 2>/dev/null || stat -c%s "$DTB") bytes)"
           UEFI="$PWD/uefi-sheng"
           echo "uefi: $UEFI"
           FD=$(find "$WORK" uefi-sheng/Build -name 'SILICIUM_UEFI.fd' 2>/dev/null | head -1)
