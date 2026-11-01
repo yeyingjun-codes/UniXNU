@@ -19,15 +19,15 @@ trustcache_tag = "xnu-8796.101.5"    # earlier tag that still has EXTERNAL_HEADE
 name = "libplatform"
 kind = "refer"
 git = "https://github.com/apple-oss-distributions/libplatform.git"
-ref = "libplatform-375.120.2"
-commit = "b7ed7cf5cf7dd12b98672435db2225a860f199d8"
+ref = "libplatform-316.100.10"
+commit = "a00a4cc36da2110578bcf3b8eeeeb93dcc7f4e11"
 
 [[source]]
 name = "libdispatch"
 kind = "refer"
 git = "https://github.com/apple-oss-distributions/libdispatch.git"
-ref = "libdispatch-1542.100.32"
-commit = "701f4d1a24ae9c6863901bbbb22624b7d1b87321"
+ref = "libdispatch-1415.140.2"
+commit = "cdb61e93e803d0093635f356753a9a30c09836db"
 
 [[source]]
 name = "AvailabilityVersions"
