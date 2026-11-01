@@ -258,9 +258,14 @@ jobs:
         if: contains(inputs.steps, 'bootimg')
         run: |
           # The board builds its firmware from the Mu-Silicium checkout (uefi-sheng).
+          # The EDK II packages the DSC needs (MdeModulePkg and friends) come from
+          # the Binaries submodule, so every submodule is initialized here.
           if [ ! -d uefi-sheng ]; then
-            git clone --depth 1 --branch sheng https://github.com/UniXNU/uefi-sheng.git uefi-sheng
+            git clone --recurse-submodules --shallow-submodules --depth 1 \
+              --branch sheng https://github.com/UniXNU/uefi-sheng.git uefi-sheng
           fi
+          git -C uefi-sheng submodule update --init --recursive --depth 1 || true
+          ls uefi-sheng/Binaries/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
           export UNIXNU_UEFI="$PWD/uefi-sheng"
           ./unixnu build firmware
 
