@@ -256,7 +256,13 @@ jobs:
       - name: Build firmware
         id: firmware
         if: contains(inputs.steps, 'bootimg')
-        run: ./unixnu build firmware
+        run: |
+          # The board builds its firmware from the Mu-Silicium checkout (uefi-sheng).
+          if [ ! -d uefi-sheng ]; then
+            git clone --depth 1 --branch sheng https://github.com/UniXNU/uefi-sheng.git uefi-sheng
+          fi
+          export UNIXNU_UEFI="$PWD/uefi-sheng"
+          ./unixnu build firmware
 
       - name: Build the boot image
         id: bootimg
@@ -268,9 +274,11 @@ jobs:
           find "$WORK" -name '*.fd' -o -name 'SILICIUM_UEFI.fd' 2>/dev/null | head -10
           DTB=$(find "$WORK/tree" -name 'sheng.dtb' -o -name 'device.dtb' -o -name '*.dtb' 2>/dev/null | head -1)
           echo "dtb: $DTB"
-          UEFI=$(ls -d out/feeds/*uefi* out/*uefi* 2>/dev/null | head -1)
+          UEFI="$PWD/uefi-sheng"
           echo "uefi: $UEFI"
-          ./unixnu bootimg --uefi "$UEFI" --fd "$(find "$WORK" -name 'SILICIUM_UEFI.fd' | head -1)" --dtb "$DTB"
+          FD=$(find "$WORK" uefi-sheng/Build -name 'SILICIUM_UEFI.fd' 2>/dev/null | head -1)
+          echo "fd: $FD"
+          ./unixnu bootimg --uefi "$UEFI" --fd "$FD" --dtb "$DTB"
 
       - name: Upload the flashable images
         if: always() && steps.check.outcome == 'success'
@@ -280,7 +288,6 @@ jobs:
           path: |
             ${{ steps.check.outputs.work }}/boot/boot.img
             ${{ steps.check.outputs.work }}/payload/payload.img
-            ${{ steps.check.outputs.work }}/userdata/userdata-root.img
             ${{ steps.check.outputs.work }}/kernel/kernel.macho
             ${{ steps.check.outputs.work }}/boot/boot.json
           if-no-files-found: warn
