@@ -265,7 +265,7 @@ jobs:
               --branch sheng https://github.com/UniXNU/uefi-sheng.git uefi-sheng
           fi
           git -C uefi-sheng submodule update --init --recursive --depth 1 || true
-          ls uefi-sheng/Binaries/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+          ls uefi-sheng/Binaries/sheng/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
           export UNIXNU_UEFI="$PWD/uefi-sheng"
           ./unixnu build firmware
 
