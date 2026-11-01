@@ -23,6 +23,7 @@ on:
           - kernel payload
           - kernel userdata
           - kernel userdata payload
+          - kernel userdata payload bootimg
         default: kernel
       xcode:
         description: Xcode version of the macos-26 image (/Applications/Xcode_<version>.app)
@@ -251,6 +252,39 @@ jobs:
           if [ -f "$RUNNER_TEMP/data.dbr" ]; then args+=(--data-ramdisk "$RUNNER_TEMP/data.dbr"); fi
           if [ "$SKIP_SETUP" = true ]; then args+=(--skip-setup); fi
           ./unixnu build payload "${args[@]}"
+
+      - name: Build firmware
+        id: firmware
+        if: contains(inputs.steps, 'bootimg')
+        run: ./unixnu build firmware
+
+      - name: Build the boot image
+        id: bootimg
+        if: contains(inputs.steps, 'bootimg')
+        run: |
+          WORK="${{ steps.check.outputs.work }}"
+          FD=$(grep -m1 '"fd"' device/board.toml | sed 's/.*= *"//; s/".*//')
+          echo "board fd template: $FD"
+          find "$WORK" -name '*.fd' -o -name 'SILICIUM_UEFI.fd' 2>/dev/null | head -10
+          DTB=$(find "$WORK/tree" -name 'sheng.dtb' -o -name 'device.dtb' -o -name '*.dtb' 2>/dev/null | head -1)
+          echo "dtb: $DTB"
+          UEFI=$(ls -d out/feeds/*uefi* out/*uefi* 2>/dev/null | head -1)
+          echo "uefi: $UEFI"
+          ./unixnu bootimg --uefi "$UEFI" --fd "$(find "$WORK" -name 'SILICIUM_UEFI.fd' | head -1)" --dtb "$DTB"
+
+      - name: Upload the flashable images
+        if: always() && steps.check.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unixnu-${{ steps.check.outputs.board }}-images
+          path: |
+            ${{ steps.check.outputs.work }}/boot/boot.img
+            ${{ steps.check.outputs.work }}/payload/payload.img
+            ${{ steps.check.outputs.work }}/userdata/userdata-root.img
+            ${{ steps.check.outputs.work }}/kernel/kernel.macho
+            ${{ steps.check.outputs.work }}/boot/boot.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Collect the text logs
         id: logs
