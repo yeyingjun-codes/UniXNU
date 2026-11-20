@@ -182,7 +182,7 @@ OSDefineOperatorMethods(IOBlockStorageDevice)
     c = json.loads((obj / 'osfmk/DEVELOPMENT/startup.o.json').read_text().strip().rstrip(','))
     # BSD sources (sys/proc.h, the system calls) take kern_exec's flags.
     bsd = json.loads((obj / 'bsd/DEVELOPMENT/kern_exec.o.json').read_text().strip().rstrip(','))
-    bsd_sources = {'BootWatchdogPolicy.c', 'BootDiagExport.c', 'WifiFirmware.c'}
+    bsd_sources = {'BootWatchdogPolicy.c', 'BootDiagExport.c', 'WifiFirmware.c', 'BootKqueueWait.c'}
     includes = ['-I', str(out / 'headers/include'), '-I', str(ROOT / 'kits/VerifiedRoot/include'),
                 '-I', str(ROOT / 'drivers/VirtioMmioBlock'), '-I', str(tree / '.cache/xnu-work/osfmk')]
     flags = ['-DNATIVE_UFS_SOURCE_API=1', '-DNATIVE_VERIFIED_BLOCK=1',
@@ -198,7 +198,7 @@ OSDefineOperatorMethods(IOBlockStorageDevice)
         # native capture code in a separate worker owned by the UFS log.
         flags.append('-DNATIVE_BOOT_PROCESS_CAPTURE=1')
         sources += [device_source(name) for name in
-                    ('BootProcessProbe.c', 'BootUiTraceProbe.c', 'BootProcessWorker.c')]
+                    ('BootProcessProbe.c', 'BootUiTraceProbe.c', 'BootProcessWorker.c', 'BootKqueueWait.c')]
         # The launchd job policy (sheng-disable-watchdogd, sheng-lite, sheng-disable-jobs, sheng-setup) that BootProgress carries on
         # iPadOS 17; the kernel runs it after the Data mount.
         sources.append(device_source('BootWatchdogPolicy.c'))
