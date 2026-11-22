@@ -4,9 +4,15 @@ import hashlib,json,struct,subprocess,sys
 from pathlib import Path
 from kernel_target import ARCH, IOS_VERSION
 if ARCH != 'arm64' or IOS_VERSION.split('.')[0] != '17':
-    # iOS 27 forwards to source-drivers builder
-    import subprocess, sys
-    subprocess.run([sys.executable, str(__file__).replace('build-sheng-hid-input.py', 'build-sheng-source-drivers.py')] + sys.argv[1:], check=True)
+    # iOS 27 forwards to source-drivers builder with auto-injected args
+    import subprocess, sys, os
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    tree = os.environ.get('UNIXNU_TREE', str(root))
+    device = os.environ.get('UNIXNU_DEVICE', str(root.parent / 'device'))
+    args = [sys.executable, str(__file__).replace('build-sheng-hid-input.py', 'build-sheng-source-drivers.py'),
+            '--tree', tree, '--device', device] + sys.argv[1:]
+    subprocess.run(args, check=True)
     sys.exit(0)
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'build/sheng-hid-input';OUT.mkdir(exist_ok=True)
 sys.path.insert(0,str(ROOT/'kits/XnuPrelink'))
