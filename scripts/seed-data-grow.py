@@ -119,6 +119,8 @@ def main():
             if not container:
                 print('APFS store did not register:', store)
                 print('attach output:', attached)
+                print('diskutil apfs list:')
+                print(listing)
                 sys.exit('No APFS container found on the attached seed')
             run('diskutil', 'apfs', 'resizeContainer', container, '0')
         finally:
