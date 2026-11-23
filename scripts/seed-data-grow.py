@@ -111,7 +111,8 @@ def main():
             for _ in range(30):
                 listing = plistlib.loads(subprocess.check_output(['diskutil', 'apfs', 'list', '-plist']))
                 for entry in listing['Containers']:
-                    if any(s['DeviceIdentifier'] in (store, store + 's1') for s in entry.get('PhysicalStores', [])):
+                    if (entry.get('DesignatedPhysicalStore') in (store, store + 's1')
+                        or any(s['DeviceIdentifier'] in (store, store + 's1') for s in entry.get('PhysicalStores', []))):
                         container = entry['ContainerReference']
                 if container:
                     break
