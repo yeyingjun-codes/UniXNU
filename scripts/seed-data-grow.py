@@ -106,12 +106,19 @@ def main():
         attached = run('hdiutil', 'attach', '-imagekey', 'diskimage-class=CRawDiskImage', '-nomount', '-nobrowse', str(raw))
         store = re.match(r'(/dev/disk\d+)', attached).group(1).split('/')[-1]
         try:
-            listing = plistlib.loads(subprocess.check_output(['diskutil', 'apfs', 'list', '-plist']))
+            import time
             container = None
-            for entry in listing['Containers']:
-                if any(s['DeviceIdentifier'] == store for s in entry.get('PhysicalStores', [])):
-                    container = entry['ContainerReference']
+            for _ in range(30):
+                listing = plistlib.loads(subprocess.check_output(['diskutil', 'apfs', 'list', '-plist']))
+                for entry in listing['Containers']:
+                    if any(s['DeviceIdentifier'] == store for s in entry.get('PhysicalStores', [])):
+                        container = entry['ContainerReference']
+                if container:
+                    break
+                time.sleep(1)
             if not container:
+                print('APFS store did not register:', store)
+                print('attach output:', attached)
                 sys.exit('No APFS container found on the attached seed')
             run('diskutil', 'apfs', 'resizeContainer', container, '0')
         finally:
