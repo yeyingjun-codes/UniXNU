@@ -179,7 +179,7 @@ dependencies = ["QcomGeniSpi"]
 source_files = ["NvtTouchCore.c"]
 runtime_identifiers = ["NativeNovatekTouch", "NvtTouchCore.c"]
 build_stage = "kernel"
-build = []
+build = ["scripts/build-arm-driver.py ShengNovatekTouch"]
 outputs = []
 legacy_name = "NativeNovatekTouch"
 
@@ -200,7 +200,7 @@ dependencies = []
 source_files = ["GeniSpi.c"]
 runtime_identifiers = ["NativeGeniSpi", "GeniSpi.c"]
 build_stage = "kernel"
-build = []
+build = ["scripts/build-arm-driver.py QcomGeniSpi"]
 outputs = []
 legacy_name = "NativeGeniSpi"
 
@@ -430,7 +430,7 @@ dependencies = []
 source_files = []
 runtime_identifiers = []
 build_stage = "kernel"
-build = []
+build = ["scripts/build-arm-driver.py AirNir"]
 outputs = []
 
 [[component]]
@@ -449,7 +449,7 @@ dependencies = []
 source_files = []
 runtime_identifiers = []
 build_stage = "kernel"
-build = []
+build = ["scripts/build-arm-driver.py VerifiedRoot"]
 outputs = []
 
 [[component]]
@@ -489,7 +489,7 @@ dependencies = []
 source_files = ["include/nw_abi.h"]
 runtime_identifiers = ["nw_board", "nw_abi"]
 build_stage = "kernel"
-build = []
+build = ["scripts/build-arm-driver.py Ath12kWifi"]
 outputs = []
 
 [[component]]
