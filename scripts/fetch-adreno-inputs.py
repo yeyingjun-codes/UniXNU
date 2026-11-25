@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import urllib.parse
 import urllib.request
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 pins = json.loads((ROOT / 'scripts/data/adreno-inputs.json').read_text())
@@ -27,8 +28,19 @@ def fetch(item):
         if TOKEN and urllib.parse.urlsplit(url).hostname in ('api.github.com', 'raw.githubusercontent.com'):
             headers['Authorization'] = f'Bearer {TOKEN}'
         request = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(request, timeout=30) as response:
-            data = response.read()
+        # Mirrors and shared CI egress addresses occasionally return 503. Retry
+        # the same immutable request; the SHA checks below still gate every byte.
+        for attempt in range(6):
+            try:
+                with urllib.request.urlopen(request, timeout=60) as response:
+                    data = response.read()
+                break
+            except urllib.error.HTTPError as error:
+                if error.code not in (403, 429, 500, 502, 503, 504) or attempt == 5:
+                    raise
+                delay = min(60, 5 * (attempt + 1))
+                print(f'{url}: HTTP {error.code}; retry {attempt + 1}/5 after {delay}s', flush=True)
+                time.sleep(delay)
         if blob:
             data = base64.b64decode(json.loads(data)['content'])
         elif encoding == 'gitiles-base64':
